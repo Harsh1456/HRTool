@@ -63,11 +63,10 @@ async def ask(
     )
     db.add(user_msg)
 
-    # RAG: retrieve relevant chunks
+    # RAG: retrieve relevant chunks from the shared knowledge base
     chunks = await retrieve_chunks(
         query=body.question,
         db=db,
-        user_id=current_user.id,
         top_k=6,
     )
 
