@@ -42,6 +42,15 @@ export function AuthProvider({ children }) {
         return userData
     }
 
+    const loginWithMicrosoft = async (idToken) => {
+        const res = await authAPI.microsoftLogin(idToken)
+        const { access_token, user: userData } = res.data
+        localStorage.setItem('hr_token', access_token)
+        localStorage.setItem('hr_user', JSON.stringify(userData))
+        setUser(userData)
+        return userData
+    }
+
     const register = async (data) => {
         const res = await authAPI.register(data)
         return res.data
