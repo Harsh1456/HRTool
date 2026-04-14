@@ -1,20 +1,49 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 import { MessageSquare, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { loginWithMicrosoft as msRedirect, handleMicrosoftCallback } from '../lib/microsoftAuth'
 
 export default function Login() {
-    const { login, register } = useAuth()
+    const { login, register, loginWithMicrosoft } = useAuth()
     const navigate = useNavigate()
     const [mode, setMode] = useState('login') // 'login' | 'register'
     const [showPw, setShowPw] = useState(false)
     const [loading, setLoading] = useState(false)
     const [form, setForm] = useState({ email: '', password: '', full_name: '' })
+    const callbackProcessed = useRef(false)
+
+    // Handle Microsoft OAuth PKCE Callback
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const code = urlParams.get('code')
+        const state = urlParams.get('state')
+
+        if (code && state && !callbackProcessed.current) {
+            callbackProcessed.current = true
+            setLoading(true)
+            const tid = toast.loading('Authenticating with Microsoft...')
+            
+            handleMicrosoftCallback(code, state)
+                .then(tokens => loginWithMicrosoft(tokens.id_token))
+                .then(() => {
+                    toast.success('Signed in successfully', { id: tid })
+                    // Remove code from URL
+                    window.history.replaceState({}, document.title, window.location.pathname)
+                    navigate('/')
+                })
+                .catch(err => {
+                    toast.error(err.message || 'Microsoft login failed', { id: tid })
+                    setLoading(false)
+                    window.history.replaceState({}, document.title, window.location.pathname)
+                })
+        }
+    }, [loginWithMicrosoft, navigate])
 
     const update = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
-    const handleSubmit = async (e) => {
+    const handleEmailSubmit = async (e) => {
         e.preventDefault()
         if (mode === 'register' && !form.email.toLowerCase().endsWith('@superiorpaving.net')) {
             toast.error('Only @superiorpaving.net emails are allowed to register.')
@@ -35,6 +64,14 @@ export default function Login() {
             toast.error(msg)
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleMSClick = async () => {
+        try {
+            await msRedirect()
+        } catch (err) {
+            toast.error(err.message || 'Could not start Microsoft login')
         }
     }
 
@@ -60,7 +97,29 @@ export default function Login() {
                             : 'Set up your HR Assist account'}
                     </p>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Microsoft SSO Button */}
+                    <button 
+                        onClick={handleMSClick}
+                        disabled={loading}
+                        type="button" 
+                        className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition shadow-sm text-gray-700 font-medium disabled:opacity-50"
+                    >
+                        <svg className="w-5 h-5" viewBox="0 0 21 21">
+                            <path fill="#f25022" d="M1 1h9v9H1z" />
+                            <path fill="#7fba00" d="M11 1h9v9h-9z" />
+                            <path fill="#00a4ef" d="M1 11h9v9H1z" />
+                            <path fill="#ffb900" d="M11 11h9v9h-9z" />
+                        </svg>
+                        Continue with Microsoft
+                    </button>
+
+                    <div className="flex items-center my-6">
+                        <div className="flex-grow border-t border-gray-100"></div>
+                        <span className="px-3 text-xs text-gray-400 font-medium uppercase tracking-wider">or sign in with email</span>
+                        <div className="flex-grow border-t border-gray-100"></div>
+                    </div>
+
+                    <form onSubmit={handleEmailSubmit} className="space-y-4">
                         {mode === 'register' && (
                             <div>
                                 <label className="label">Full Name</label>
