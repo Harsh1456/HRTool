@@ -38,6 +38,7 @@ export const authAPI = {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         })
     },
+    microsoftLogin: (idToken) => api.post('/api/auth/microsoft', { id_token: idToken }),
     me: () => api.get('/api/auth/me'),
     changePassword: (data) => api.put('/api/auth/change-password', data),
     updateProfile: (data) => api.put('/api/auth/profile', data),
