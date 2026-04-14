@@ -135,7 +135,7 @@ function ManagePdfsModal({ isOpen, onClose }) {
                 <div className="p-6 flex-1 overflow-y-auto">
                     <div className="flex justify-between items-center mb-4">
                         <p className="text-sm text-gray-500">
-                            Upload PDFs and DOCX files to build your organization's knowledge base.
+                            Shared knowledge base — documents uploaded here are searchable by every user's chatbot.
                         </p>
                         <input
                             ref={fileRef}
