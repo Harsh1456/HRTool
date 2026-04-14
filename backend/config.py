@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     openai_chat_model: str = "gpt-4o"
     openai_embed_model: str = "text-embedding-3-small"
     embed_dimensions: int = 1536
+    # Microsoft Entra ID / Azure AD (for SSO)
+    microsoft_client_id: str = ""
+    microsoft_tenant_id: str = "common"
 
     class Config:
         env_file = ENV_PATH
