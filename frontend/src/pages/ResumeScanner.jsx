@@ -156,7 +156,7 @@ export default function ResumeScanner() {
                                     }}
                                 >
                                     <option value="">Select...</option>
-                                    {rolesData.map(r => (
+                                    {[...rolesData].sort((a, b) => a.title.localeCompare(b.title)).map(r => (
                                         <option key={r.title} value={r.title}>{r.title}</option>
                                     ))}
                                 </select>
