@@ -90,6 +90,7 @@ export default function JDBuilder() {
     const [result, setResult] = useState(null)
     const [loading, setLoading] = useState(false)
     const [exporting, setExporting] = useState(false)
+    const [isEditing, setIsEditing] = useState(false)
 
     // History
     const [history, setHistory] = useState([])
@@ -299,35 +300,65 @@ export default function JDBuilder() {
                     </div>
 
                     {/* ── Right: Preview ── */}
-                    <div className="card flex flex-col">
+                    <div className="card flex flex-col min-h-[700px] bg-gray-50/50">
                         {result ? (
                             <>
-                                {/* Job card preview */}
-                                <div className="border border-gray-100 rounded-xl p-4 mb-4 bg-gray-50">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div className="w-8 h-8 bg-primary-700 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <Building2 size={14} className="text-white" />
-                                        </div>
-                                        <div>
-                                            <div className="font-semibold text-gray-900 text-sm">{result.title || result.job_title}</div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1 text-xs text-gray-500">
-                                        {form.location && <div className="flex items-center gap-1"><MapPin size={11} /> {form.location}</div>}
-                                        {form.department && <div className="flex items-center gap-1"><Briefcase size={11} /> {form.department}</div>}
-                                        {form.employment_type && <div className="flex items-center gap-1"><User size={11} /> {form.employment_type}</div>}
-                                    </div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-semibold text-gray-900">
+                                        Preview — {result.title || result.job_title}
+                                    </h3>
+                                    <button 
+                                        onClick={() => setIsEditing(!isEditing)} 
+                                        className={`text-xs px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors ${
+                                            isEditing 
+                                            ? 'bg-primary-100 text-primary-700 font-medium' 
+                                            : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 shadow-sm'
+                                        }`}
+                                    >
+                                        <Edit2 size={12} />
+                                        {isEditing ? 'Editing Body Text' : 'Edit Text'}
+                                    </button>
                                 </div>
 
-                                {/* Content */}
-                                <div className="flex-1 overflow-y-auto min-h-0 border border-gray-100 rounded-lg p-4 bg-white shadow-sm">
-                                    <PlainTextRenderer content={result.content} />
+                                <div className="flex-1 overflow-y-auto mb-4 border border-gray-200 rounded-lg p-8 sm:p-12 bg-white shadow-sm flex flex-col relative text-[13px] font-['Calibri',_sans-serif]">
+                                    {/* Document Header matching docx */}
+                                    <div className="flex flex-col items-center mb-8 select-none">
+                                        <img src="/logo.png" alt="Company Logo" className="w-[3in] max-w-full mb-6" />
+                                        <h1 className="text-[18pt] font-bold text-center" style={{ fontFamily: 'Arial, sans-serif', color: '#2E7D32', marginBottom: '8px' }}>
+                                            {result.title || result.job_title}
+                                        </h1>
+                                        <div className="text-gray-600 text-[14px]">
+                                            {[form.department, form.location, form.employment_type].filter(Boolean).join(' | ')}
+                                        </div>
+                                    </div>
+
+                                    {isEditing ? (
+                                        <textarea
+                                            autoFocus
+                                            className="w-full flex-1 resize-none outline-none bg-transparent"
+                                            style={{ 
+                                                fontFamily: 'Calibri, sans-serif', 
+                                                fontSize: '13.5px',
+                                                lineHeight: '1.7',
+                                                minHeight: '400px'
+                                            }}
+                                            value={result.content}
+                                            onChange={(e) => setResult({ ...result, content: e.target.value })}
+                                        />
+                                    ) : (
+                                        <div 
+                                            className="flex-1 cursor-text hover:bg-gray-50/50 transition-colors rounded -mx-2 px-2 pb-4" 
+                                            onClick={() => setIsEditing(true)}
+                                            title="Click to edit text"
+                                        >
+                                            <PlainTextRenderer content={result.content} />
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* Actions */}
-                                <div className="flex gap-2 mt-4">
+                                <div className="flex gap-2">
                                     <button onClick={() => { navigator.clipboard.writeText(result.content); toast.success('Copied!') }} className="btn-secondary flex-1 justify-center">
-                                        <Copy size={14} /> Copy
+                                        <Copy size={14} /> Copy Text
                                     </button>
                                     <button onClick={handleExport} disabled={exporting} className="btn-primary flex-1 justify-center">
                                         {exporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
@@ -336,7 +367,7 @@ export default function JDBuilder() {
                                 </div>
                             </>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center text-gray-400 text-sm">
+                            <div className="flex-1 flex flex-col items-center justify-center text-gray-400 text-sm h-full">
                                 <FileText size={40} className="opacity-20 mb-3" />
                                 <p>Fill in the form and click <strong>Generate JD</strong></p>
                                 <p className="text-xs mt-1">The job description will appear here as a live preview.</p>
