@@ -96,6 +96,7 @@ export default function OfferLetter() {
     const [result, setResult] = useState(null)
     const [loading, setLoading] = useState(false)
     const [exporting, setExporting] = useState(false)
+    const [isEditing, setIsEditing] = useState(false)
 
     // History
     const [history, setHistory] = useState([])
@@ -283,18 +284,62 @@ export default function OfferLetter() {
                     </div>
 
                     {/* Preview */}
-                    <div className="card flex flex-col min-h-[500px]">
+                    <div className="card flex flex-col min-h-[650px] bg-gray-50/50">
                         {result ? (
                             <>
-                                <h3 className="font-semibold text-gray-900 mb-3">
-                                    Offer Letter — {result.candidate_name}
-                                </h3>
-                                <div className="flex-1 overflow-y-auto border border-gray-100 rounded-lg p-5 bg-white shadow-sm min-h-0">
-                                    <PlainTextRenderer content={result.content} />
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-semibold text-gray-900">
+                                        Preview — {result.candidate_name}
+                                    </h3>
+                                    <button 
+                                        onClick={() => setIsEditing(!isEditing)} 
+                                        className={`text-xs px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors ${
+                                            isEditing 
+                                            ? 'bg-primary-100 text-primary-700 font-medium' 
+                                            : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 shadow-sm'
+                                        }`}
+                                    >
+                                        <Edit2 size={12} />
+                                        {isEditing ? 'Editing Body Text' : 'Edit Text'}
+                                    </button>
                                 </div>
-                                <div className="flex gap-2 mt-4">
+
+                                <div className="flex-1 overflow-y-auto mb-4 border border-gray-200 rounded-lg p-8 sm:p-12 bg-white shadow-sm flex flex-col relative text-[13px] font-['Calibri',_sans-serif]">
+                                    {/* Document Header matching docx */}
+                                    <div className="flex flex-col items-center mb-8 select-none">
+                                        <img src="/logo.png" alt="Company Logo" className="w-[3in] max-w-full mb-6" />
+                                        <h1 className="text-[14pt] font-bold text-center" style={{ fontFamily: 'Arial, sans-serif' }}>
+                                            OFFER OF EMPLOYMENT
+                                        </h1>
+                                    </div>
+
+                                    {isEditing ? (
+                                        <textarea
+                                            autoFocus
+                                            className="w-full flex-1 resize-none outline-none bg-transparent"
+                                            style={{ 
+                                                fontFamily: 'Calibri, sans-serif', 
+                                                fontSize: '13.5px',
+                                                lineHeight: '1.7',
+                                                minHeight: '400px'
+                                            }}
+                                            value={result.content}
+                                            onChange={(e) => setResult({ ...result, content: e.target.value })}
+                                        />
+                                    ) : (
+                                        <div 
+                                            className="flex-1 cursor-text hover:bg-gray-50/50 transition-colors rounded -mx-2 px-2 pb-4" 
+                                            onClick={() => setIsEditing(true)}
+                                            title="Click to edit text"
+                                        >
+                                            <PlainTextRenderer content={result.content} />
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex gap-2">
                                     <button onClick={() => { navigator.clipboard.writeText(result.content); toast.success('Copied!') }} className="btn-secondary flex-1 justify-center">
-                                        <Copy size={14} /> Copy
+                                        <Copy size={14} /> Copy Text
                                     </button>
                                     <button onClick={handleExport} disabled={exporting} className="btn-primary flex-1 justify-center">
                                         {exporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
@@ -303,7 +348,7 @@ export default function OfferLetter() {
                                 </div>
                             </>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center text-gray-400 text-sm">
+                            <div className="flex-1 flex flex-col items-center justify-center text-gray-400 text-sm h-full">
                                 <Mail size={40} className="opacity-20 mb-3" />
                                 <p>Fill in candidate details and click Generate</p>
                             </div>
