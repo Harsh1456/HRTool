@@ -100,7 +100,7 @@ export default function Layout() {
             >
                 {/* Logo & Mobile Close */}
                 <div
-                    className={`py-5 border-b border-gray-100 flex items-center justify-between transition-opacity ${isSidebarExpanded || isMobileMenuOpen ? 'px-5' : 'px-0 justify-center'}`}
+                    className={`py-5 border-b border-gray-100 flex items-center transition-opacity ${isSidebarExpanded || isMobileMenuOpen ? 'px-5 justify-start' : 'px-0 justify-center w-full'}`}
                 >
                     <div className="flex flex-col items-center justify-center gap-1 cursor-pointer" onClick={() => { navigate('/'); setIsMobileMenuOpen(false); }}>
                         <img 
